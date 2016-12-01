@@ -26,8 +26,8 @@ public final class DemoDetailsList {
     }
 
     public static final DemoDetails[] DEMOS = {
-            new DemoDetails(R.string.ground_overlay_demo_label,
-                    R.string.ground_overlay_demo_description,
-                    GroundOverlayDemoActivity.class)
+            new DemoDetails(R.string.capital_guess_label,
+                    R.string.capital_guess_description,
+                    CapitalGuessActivity.class)
     };
 }

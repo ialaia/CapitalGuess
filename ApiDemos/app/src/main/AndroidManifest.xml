@@ -58,8 +58,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".GroundOverlayDemoActivity"
-            android:label="@string/ground_overlay_demo_label"/>
+            android:name=".CapitalGuessActivity"
+            android:label="@string/capital_guess_label"/>
 
     </application>
 

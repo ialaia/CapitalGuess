@@ -49,7 +49,7 @@ import java.util.List;
 /**
  * This shows how to add a ground overlay to a map.
  */
-public class GroundOverlayDemoActivity extends AppCompatActivity
+public class CapitalGuessActivity extends AppCompatActivity
         implements OnSeekBarChangeListener, OnMapReadyCallback,
         GoogleMap.OnGroundOverlayClickListener {
 
@@ -60,6 +60,7 @@ public class GroundOverlayDemoActivity extends AppCompatActivity
     private FrameLayout m_GameOptionsMenu;
     private LinearLayout m_SettingsMenu;
     private RelativeLayout m_GameView;
+    private LinearLayout m_EndGameOverlay;
 
     private final List<BitmapDescriptor> mImages = new ArrayList<BitmapDescriptor>();
     private static final String DEBUGTAG = "MAIN DEBUG";
@@ -80,6 +81,7 @@ public class GroundOverlayDemoActivity extends AppCompatActivity
         m_GameOptionsMenu = (FrameLayout) findViewById(R.id.Game_Options_Menu);//Layer->1
         m_SettingsMenu = (LinearLayout) findViewById(R.id.Settings_Menu);//Layer->2
         m_GameView = (RelativeLayout) findViewById(R.id.Map_Screen);//Layer->3
+        m_EndGameOverlay = (LinearLayout) findViewById(R.id.EndScreen);//Layer->4
 
         changeMenu(0);
 
@@ -103,6 +105,12 @@ public class GroundOverlayDemoActivity extends AppCompatActivity
         });
         final Button btn_BackToMainMenuFromSettings = (Button) findViewById(R.id.btn_BackToMainMenuFromSettings);
         btn_BackToMainMenuFromSettings.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                changeMenu(0);
+            }
+        });
+        final Button btn_BackToMainMenuFromEndScreen = (Button) findViewById(R.id.btn_back_from_end_game_menu);
+        btn_BackToMainMenuFromEndScreen.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 changeMenu(0);
             }
@@ -160,30 +168,36 @@ public class GroundOverlayDemoActivity extends AppCompatActivity
 
     private void changeMenu(int layer){
         switch(layer){
-            case 0:
+            case 0: //MainMenu Active
                 m_MainMenu.setVisibility(View.VISIBLE);
                 m_GameOptionsMenu.setVisibility(View.GONE);
                 m_SettingsMenu.setVisibility(View.GONE);
                 m_GameView.setVisibility(View.GONE);
+                m_EndGameOverlay.setVisibility(View.GONE);
                 break;
-            case 1:
+            case 1: //Game Options Active
                 m_MainMenu.setVisibility(View.GONE);
                 m_GameOptionsMenu.setVisibility(View.VISIBLE);
                 m_SettingsMenu.setVisibility(View.GONE);
                 m_GameView.setVisibility(View.GONE);
+                m_EndGameOverlay.setVisibility(View.GONE);
                 break;
-            case 2:
+            case 2: //Settings Active
                 m_MainMenu.setVisibility(View.GONE);
                 m_GameOptionsMenu.setVisibility(View.GONE);
                 m_SettingsMenu.setVisibility(View.VISIBLE);
                 m_GameView.setVisibility(View.GONE);
+                m_EndGameOverlay.setVisibility(View.GONE);
                 break;
-            case 3:
+            case 3: //Gameplay Active
                 m_MainMenu.setVisibility(View.GONE);
                 m_GameOptionsMenu.setVisibility(View.GONE);
                 m_SettingsMenu.setVisibility(View.GONE);
                 m_GameView.setVisibility(View.VISIBLE);
+                m_EndGameOverlay.setVisibility(View.GONE);
                 break;
+            case 4: //End Game Active
+                m_EndGameOverlay.setVisibility(View.VISIBLE);
         }
     }
 
