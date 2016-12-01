@@ -73,6 +73,7 @@ public class CapitalGuessActivity extends AppCompatActivity
     //Game Variables
     private int m_NumberOfRounds = 10;
     private int m_Zoom = 16;
+    private int m_CurrentGuess = 0;
     private boolean m_HasClues = true;
     private boolean m_HasMapInfo = true;
     private int m_NumberOfCountries = 50;
@@ -339,11 +340,14 @@ public class CapitalGuessActivity extends AppCompatActivity
 
     public void goodGuess() throws JSONException {
         setNewLocation();
+        m_CurrentGuess = 0;
         return;
     }
 
     public void badGuess()
     {
+        m_CurrentGuess++;
+        zoomOutCamera(m_CurrentGuess);
         return;
     }
 
