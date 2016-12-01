@@ -211,8 +211,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/newark_prudential_sunny"
-        android:visibility="gone"
-        android:id="@+id/Settings_Menu">
+        android:id="@+id/Settings_Menu"
+        android:visibility="gone">
 
         <TextView
             android:text="@string/txt_Settings"
@@ -399,7 +399,8 @@
             android:layout_height="match_parent"
             android:id="@+id/EndScreen"
             android:background="@android:color/holo_blue_dark"
-            android:layout_margin="75dp">
+            android:layout_margin="75dp"
+            android:visibility="gone">
 
             <TextView
                 android:text="Score Display"
@@ -456,7 +457,8 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:visibility="visible"
+            android:id="@+id/ClueLayout">
 
             <TextView
                 android:text="TextView"
@@ -500,15 +502,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="bottom"
-            android:visibility="gone">
+            android:visibility="visible"
+            android:id="@+id/KeyboardLayout">
 
-            <Button
-                android:layout_width="wrap_content"
-                android:id="@+id/btn_Keyboard"
+            <EditText
+                android:layout_height="100dp"
+                android:inputType="text"
+                android:ems="10"
+                android:id="@+id/input_player"
                 android:layout_weight="1"
                 android:background="@mipmap/keyboard_icon"
-                android:layout_height="150dp"
-                android:layout_marginLeft="115dp" />
+                android:layout_marginLeft="75dp"
+                android:layout_width="150dp" />
 
             <TextView
                 android:text="100"
