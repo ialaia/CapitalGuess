@@ -15,36 +15,34 @@
  */
 
 package com.example.mapdemo;
-
+import java.lang.Math;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.GroundOverlay;
-import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 
-import android.app.Fragment;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
 
 /**
  * This shows how to add a ground overlay to a map.
@@ -54,7 +52,7 @@ public class CapitalGuessActivity extends AppCompatActivity
         GoogleMap.OnGroundOverlayClickListener {
 
 
-    private static final LatLng NEWARK = new LatLng(43.6761, -79.4105);
+    private static LatLng m_MapCenter = new LatLng(43.6761, -79.4105);
 
     private FrameLayout m_MainMenu;
     private FrameLayout m_GameOptionsMenu;
@@ -62,15 +60,21 @@ public class CapitalGuessActivity extends AppCompatActivity
     private RelativeLayout m_GameView;
     private LinearLayout m_EndGameOverlay;
 
-    private final List<BitmapDescriptor> mImages = new ArrayList<BitmapDescriptor>();
-    private static final String DEBUGTAG = "MAIN DEBUG";
 
-    private int mCurrentEntry = 0;
+    private static final String DEBUGTAG = "CapitalGuessDebug";
+
+    //Game Variables
+    private int m_NumberOfRounds = 10;
+    private boolean m_HasClues = true;
+    private boolean m_HasMapInfo = true;
+    private int m_NumberOfCountries = 50;
+    private ArrayList<Integer> m_PreviouslySelectedCountries = new ArrayList<Integer>();
+    private ArrayList<JSONObject> m_Data = new ArrayList<JSONObject>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.ground_overlay_demo);
+        setContentView(R.layout.capital_guess);
 
 
         MapFragment mapFragment =
@@ -84,6 +88,7 @@ public class CapitalGuessActivity extends AppCompatActivity
         m_EndGameOverlay = (LinearLayout) findViewById(R.id.EndScreen);//Layer->4
 
         changeMenu(0);
+
 
         final Button btn_Settings = (Button) findViewById(R.id.btn_Settings);
         btn_Settings.setOnClickListener(new View.OnClickListener() {
@@ -133,23 +138,25 @@ public class CapitalGuessActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap map) {
         MapStyleOptions mapStyles;
-        // Register a listener to respond to clicks on GroundOverlays.
-        //map.setOnGroundOverlayClickListener(this);
         map.setIndoorEnabled(false);
         map.setBuildingsEnabled(false);
-        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(NEWARK, 18));
-        //map.setMapType(2);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(NEWARK, 18));
-
 
         mapStyles = MapStyleOptions.loadRawResourceStyle(this, R.raw.mapstyle_cgg_none);
 
         map.setMapStyle(mapStyles);
-
-
-          // Override the default content description on the view, for accessibility mode.
-        // Ideally this string would be localised.
         map.setContentDescription("The game");
+        try {
+            loadCountryList(0);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            setNewLocation(map);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -206,6 +213,125 @@ public class CapitalGuessActivity extends AppCompatActivity
      */
     @Override
     public void onGroundOverlayClick(GroundOverlay groundOverlay) {
+    }
+
+    public String loadJSONFromAsset(String filename) throws IOException {
+        Log.v(DEBUGTAG, "Loading JSON");
+        InputStream is = getResources().openRawResource(R.raw.country_list_50);
+        Writer writer = new StringWriter();
+        char[] buffer = new char[1024];
+        try {
+            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, n);
+            }
+        } finally {
+            is.close();
+        }
+
+        String jsonString = writer.toString();
+        return jsonString;
+    }
+
+    private void setNewLocation(GoogleMap map) throws JSONException {
+        boolean previouslyDone = false;
+        int currentRandomIndex = 0;
+        do{
+            currentRandomIndex = (int)Math.floor( Math.random() * (double)m_NumberOfCountries);
+            previouslyDone = false;
+            for (int i = 0; i < m_PreviouslySelectedCountries.size(); ++i)
+            {
+                if (m_PreviouslySelectedCountries.get(i) == currentRandomIndex)
+                {
+                    previouslyDone = true;
+                    break;
+                }
+
+            }
+        }
+        while (previouslyDone);
+
+        m_PreviouslySelectedCountries.add(currentRandomIndex);
+
+        double lat, lng;
+        lat = (double)m_Data.get(currentRandomIndex).getJSONArray("latlng").get(0);
+        lng = (double)m_Data.get(currentRandomIndex).getJSONArray("latlng").get(1);
+        m_MapCenter =  new LatLng(lat, lng);
+
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(m_MapCenter, 18));
+     /*
+
+        latPos = data[i].latlng[0];
+        lngPos = data[i].latlng[1];
+        country = data[i].name.common;
+        countryOf = data[i].name.official;
+        demonym = data[i].demonym;
+        city = data[i].capital;
+        countryArea = data[i].area;
+        countryRegion = data[i].region;
+        //returns an array
+        countryLang = data[i].languages;
+        testArray = data[0].languages;
+        results.innerHTML = "";
+        clueResults();*/
+    }
+
+
+    //Loads the json file based on selected difficulty/number of countries.
+    public void loadCountryList(int difficulty) throws JSONException, IOException {
+        String loadedFilename;
+        switch(difficulty){
+            case 0:
+                loadedFilename = "country_list_50.json";
+                m_NumberOfCountries = 50;
+                break;
+            case 1:
+                loadedFilename = "country_list_100.json";
+                m_NumberOfCountries = 100;
+                break;
+            case 2:
+                loadedFilename = "country_list_185.json";
+                m_NumberOfCountries = 185;
+                break;
+            case 3:
+                loadedFilename = "country_list_238.json";
+                m_NumberOfCountries = 238;
+                break;
+            default:
+                loadedFilename = "country_list_50.json";
+                m_NumberOfCountries = 50;
+                break;
+        }
+        Log.v(DEBUGTAG, loadedFilename);
+        JSONArray jArray = new JSONArray();
+
+        String s = loadJSONFromAsset(loadedFilename);
+        Log.v(DEBUGTAG, s);
+        jArray = new JSONArray(s);
+
+        for(int i = 0; i < jArray.length(); ++i){
+            m_Data.add(new JSONObject(String.valueOf(jArray.get(i))));
+        }
+    }
+    //Getters and setters for game variables.
+    public void setNumberOfRounds(int num){
+        m_NumberOfRounds = num;
+    }
+    public int getNumberOfRounds(){
+        return m_NumberOfRounds;
+    }
+    public void setClues(boolean val){
+        m_HasClues = val;
+    }
+    public boolean getClues(){
+        return m_HasClues;
+    }
+    public void setMapInfo(boolean val){
+        m_HasMapInfo = val;
+    }
+    public boolean getMapInfo(){
+        return m_HasMapInfo;
     }
 
 
