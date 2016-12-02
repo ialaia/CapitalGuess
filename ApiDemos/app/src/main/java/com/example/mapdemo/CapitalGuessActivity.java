@@ -48,6 +48,7 @@ import org.json.JSONArray;
 
 import java.io.*;
 import android.view.KeyEvent;
+import android.widget.TextView;
 
 /**
  * This shows how to add a ground overlay to a map.
@@ -66,6 +67,12 @@ public class CapitalGuessActivity extends AppCompatActivity
     private LinearLayout m_EndGameOverlay;
     private LinearLayout m_GameClueOverlay;
     private LinearLayout m_GameBottomBarOverlay;
+
+    //Clue text display refrences
+    private TextView m_Clue_One_Display;
+    private TextView m_Clue_Two_Display;
+    private TextView m_Clue_Three_Display;
+    private TextView m_Clue_Four_Display;
 
     private static final String DEBUGTAG = "CapitalGuessDebug";
     private GoogleMap m_Map;
@@ -90,7 +97,7 @@ public class CapitalGuessActivity extends AppCompatActivity
         MapFragment mapFragment =
                 (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        //Referencing menues
         m_MainMenu = (FrameLayout) findViewById(R.id.Main_Menu);//Layer->0
         m_GameOptionsMenu = (FrameLayout) findViewById(R.id.Game_Options_Menu);//Layer->1
         m_SettingsMenu = (LinearLayout) findViewById(R.id.Settings_Menu);//Layer->2
@@ -98,8 +105,13 @@ public class CapitalGuessActivity extends AppCompatActivity
         m_EndGameOverlay = (LinearLayout) findViewById(R.id.EndScreen);//Layer->4
         m_GameClueOverlay = (LinearLayout) findViewById(R.id.ClueLayout);
         m_GameBottomBarOverlay = (LinearLayout) findViewById(R.id.KeyboardLayout);
-
+        //Setting the menues to default state on start
         changeMenu(0);
+        //Referencing the Clue fields
+        m_Clue_One_Display = (TextView) findViewById((R.id.clue1));
+        m_Clue_Two_Display = (TextView) findViewById((R.id.clue2));
+        m_Clue_Three_Display = (TextView) findViewById((R.id.clue3));
+        m_Clue_Four_Display = (TextView) findViewById((R.id.clue4));
 
 
         final Button btn_Settings = (Button) findViewById(R.id.btn_Settings);
@@ -302,7 +314,11 @@ public class CapitalGuessActivity extends AppCompatActivity
         m_MapCenter =  new LatLng(lat, lng);
 
         m_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(m_MapCenter, m_Zoom));
-
+        try {
+            displayClues();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void zoomOutCamera(int zoomLevel)
@@ -341,14 +357,73 @@ public class CapitalGuessActivity extends AppCompatActivity
     public void goodGuess() throws JSONException {
         setNewLocation();
         m_CurrentGuess = 0;
+        try { displayClues(); } catch (JSONException e) { e.printStackTrace(); }
         return;
     }
 
     public void badGuess()
     {
         m_CurrentGuess++;
+        try { displayClues(); } catch (JSONException e) { e.printStackTrace(); }
         zoomOutCamera(m_CurrentGuess);
         return;
+    }
+    public void displayClues() throws JSONException {
+        if(!m_HasClues){
+            m_Clue_One_Display.setVisibility(View.GONE);
+            m_Clue_Two_Display.setVisibility(View.GONE);
+            m_Clue_Three_Display.setVisibility(View.GONE);
+            m_Clue_Four_Display.setVisibility(View.GONE);
+            return;
+        }
+        switch(m_CurrentGuess){
+            case 0:
+                //set visibility
+                m_Clue_One_Display.setVisibility(View.VISIBLE);
+                m_Clue_Two_Display.setVisibility(View.GONE);
+                m_Clue_Three_Display.setVisibility(View.GONE);
+                m_Clue_Four_Display.setVisibility(View.GONE);
+                //set string
+                String newClue1 = "Capital: " +  m_Data.get(currentRandomIndex).getString("capital");
+                m_Clue_One_Display.setText(newClue1);
+                break;
+            case 1:
+                //set visibility
+                m_Clue_One_Display.setVisibility(View.VISIBLE);
+                m_Clue_Two_Display.setVisibility(View.VISIBLE);
+                m_Clue_Three_Display.setVisibility(View.GONE);
+                m_Clue_Four_Display.setVisibility(View.GONE);
+                //set string
+                String newClue2 = "Region: " +  m_Data.get(currentRandomIndex).getString("region");
+                m_Clue_Two_Display.setText(newClue2);
+                break;
+            case 2:
+                //set visibility
+                m_Clue_One_Display.setVisibility(View.VISIBLE);
+                m_Clue_Two_Display.setVisibility(View.VISIBLE);
+                m_Clue_Three_Display.setVisibility(View.VISIBLE);
+                m_Clue_Four_Display.setVisibility(View.GONE);
+                //set string
+                String newClue3 = "Official Languages: ";
+                for(int i = 0; i < m_Data.get(currentRandomIndex).getJSONArray("languages").length(); i++){
+                    newClue3 += m_Data.get(currentRandomIndex).getJSONArray("languages").get(i);
+                    if(i < m_Data.get(currentRandomIndex).getJSONArray("languages").length() -1){
+                        newClue3 += ", ";
+                    }
+                }
+                m_Clue_Three_Display.setText(newClue3);
+                break;
+            case 3:
+                //set visibility
+                m_Clue_One_Display.setVisibility(View.VISIBLE);
+                m_Clue_Two_Display.setVisibility(View.VISIBLE);
+                m_Clue_Three_Display.setVisibility(View.VISIBLE);
+                m_Clue_Four_Display.setVisibility(View.VISIBLE);
+                //set string
+                String newClue4 = "Inhabitants: "+ m_Data.get(currentRandomIndex).getString("demonym");
+                m_Clue_Four_Display.setText(newClue4);
+                break;
+        }
     }
 
     //Loads the json file based on selected difficulty/number of countries.
@@ -384,6 +459,7 @@ public class CapitalGuessActivity extends AppCompatActivity
         for(int i = 0; i < jArray.length(); ++i){
             m_Data.add(new JSONObject(String.valueOf(jArray.get(i))));
         }
+
     }
     //Getters and setters for game variables.
     public void setNumberOfRounds(int num){
