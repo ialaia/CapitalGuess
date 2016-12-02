@@ -39,9 +39,7 @@ public final class MainActivity extends AppCompatActivity
         implements AdapterView.OnItemClickListener {
 
 
-    /**
-     * A custom array adapter that shows a {@link FeatureView} containing details about the demo.
-     */
+
     private static class CustomArrayAdapter extends ArrayAdapter<DemoDetails> {
 
         /**

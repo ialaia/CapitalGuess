@@ -49,6 +49,8 @@ import org.json.JSONArray;
 import java.io.*;
 import android.view.KeyEvent;
 import android.widget.TextView;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
 
 /**
  * This shows how to add a ground overlay to a map.
@@ -340,8 +342,18 @@ public class CapitalGuessActivity extends AppCompatActivity
         }
         m_Map.moveCamera(CameraUpdateFactory.newLatLngZoom(m_MapCenter, m_Zoom));
     }
-
+    //Submitting a new guess
     public void submitGuess(String input) throws JSONException {
+        EditText editField = (EditText) findViewById(R.id.input_player);
+        View view = this.getCurrentFocus();
+        if(input.equalsIgnoreCase(""))
+        {
+            if (view != null) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+            return;
+        }
         String commonName = m_Data.get(currentRandomIndex).getJSONObject("name").getString("common");
         String officialName = m_Data.get(currentRandomIndex).getJSONObject("name").getString("official");
         Log.v(DEBUGTAG, input.toUpperCase());
@@ -349,9 +361,19 @@ public class CapitalGuessActivity extends AppCompatActivity
         if(input.equalsIgnoreCase(commonName) || input.equalsIgnoreCase(officialName))
         {
             goodGuess();
+            editField.setText("");
+            if (view != null) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
             return;
         }
         badGuess();
+        editField.setText("");
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     public void goodGuess() throws JSONException {
