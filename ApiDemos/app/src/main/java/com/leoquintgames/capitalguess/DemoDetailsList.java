@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.mapdemo;
+package com.leoquintgames.capitalguess;
 
 /**
  * A list of all the demos we have available.

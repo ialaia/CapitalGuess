@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.mapdemo;
+package com.leoquintgames.capitalguess;
 
 import android.content.Context;
 import android.content.Intent;

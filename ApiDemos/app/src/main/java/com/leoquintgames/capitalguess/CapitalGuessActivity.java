@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.mapdemo;
+package com.leoquintgames.capitalguess;
 import java.lang.Math;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,11 +27,7 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 
-import android.content.res.AssetManager;
-import android.inputmethodservice.Keyboard;
 import android.os.Bundle;
-import android.os.Debug;
-import android.renderscript.ScriptGroup;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
